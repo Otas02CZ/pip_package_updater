@@ -8,10 +8,13 @@ from subprocess import run, call, PIPE
 import os
 
 print("Tool for updating installed pip packages - v0.1")
-result: str = str(run("pip freeze", stdout=PIPE).stdout)[2:-2]
-packages: list[str] = [package_version[:package_version.index("=")] for package_version in result.split("\\r\\n")]
 match os.name:
     case "nt":
+        result: str = str(run("pip freeze", stdout=PIPE).stdout)[2:-2]
+        packages: list[str] = [package_version[:package_version.index("=")] for package_version in result.split("\\r\\n")]
         call(f"python.exe -m pip install --upgrade {' '.join(packages)}")
     case "posix":
-        call(f"python3 -m pip install --upgrade {' '.join(packages)}")
+        result: str = str(run(["python3", "-m","pip", "freeze"], stdout=PIPE).stdout)[2:-2]
+        packages: list[str] = [package_version[:package_version.index("=")] for package_version in result.split("\\n")]
+        command: list[str] = ["python3", "-m", "pip", "install", "--upgrade"] + packages
+        call(command)
